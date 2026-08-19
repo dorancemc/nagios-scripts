@@ -11,7 +11,7 @@ Every file here is ready to copy: download it into the plugins directory, give i
 | `check_connss.py` | Socket connections by state | `ss` |
 | `check_cpu.sh` | CPU usage | `mpstat` |
 | `check_date.sh` | Days left until a given date, for contract or licence expiry | — |
-| `check_expiration.sh` | Domain name expiry over whois | `whois` |
+| `check_domain_expiration.py` | Domain name expiry: asks RDAP first, falls back to whois | `python3`, `whois` |
 | `check_iops.sh` | Disk IOPS | `iostat` |
 | `check_loadwhm.php` | Server load through the WHM API | `php-cli` |
 | `check_mem.py` | Memory usage from `/proc/meminfo` | `python3` |
