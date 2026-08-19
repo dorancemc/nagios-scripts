@@ -15,5 +15,8 @@ Every file here is ready to copy: download it into the plugins directory, give i
 | `check_iops.sh` | Disk IOPS | `iostat` |
 | `check_loadwhm.php` | Server load through the WHM API | `php-cli` |
 | `check_mem.py` | Memory usage from `/proc/meminfo` | `python3` |
+| `check_netint.py` | Local network interfaces: link state, traffic, errors | `python3`, `netint_common.py` |
 | `check_query_mysql.sh` | Row count returned by a MySQL query | `mysql` |
 | `check_smtp_cert.sh` | Certificate expiry on SMTP port 25 | `openssl` |
+| `check_snmp_netint.py` | Remote network interfaces over SNMP, with Cisco and STP support | `python3`, `net-snmp-utils`, `netint_common.py` |
+| `check_users_ip.py` | Logged-in users, counted once per source address | `python3` |
