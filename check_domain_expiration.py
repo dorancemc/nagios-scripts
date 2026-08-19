@@ -4,7 +4,8 @@
     Nagios plugin to check when a domain name expires.
 
     Asks RDAP first and falls back to whois when the TLD serves no RDAP, which
-    is the case for most ccTLDs. Standard library only.
+    is the case for most ccTLDs. The whois server comes from IANA, so no local
+    table is needed and the whois binary is not used. Standard library only.
 
     by Dorance <dorancemc@gmail.com>
 """
@@ -12,7 +13,7 @@
 import argparse
 import json
 import re
-import subprocess
+import socket
 import sys
 import urllib.error
 import urllib.request
@@ -21,6 +22,7 @@ from datetime import date, datetime, timezone
 OK, WARNING, CRITICAL, UNKNOWN = 0, 1, 2, 3
 
 BOOTSTRAP = "https://data.iana.org/rdap/dns.json"
+IANA_WHOIS = "whois.iana.org"
 
 WHOIS_KEYS = re.compile(
     r"^\s*(registry expiry date|registrar registration expiration date|"
@@ -74,23 +76,39 @@ def from_rdap(domain, timeout):
     return None, "RDAP has no expiration event"
 
 
+def whois_query(server, question, timeout):
+    with socket.create_connection((server, 43), timeout=timeout) as connection:
+        connection.sendall((question + "\r\n").encode())
+        chunks = []
+        while True:
+            data = connection.recv(4096)
+            if not data:
+                break
+            chunks.append(data)
+    return b"".join(chunks).decode("utf-8", "replace")
+
+
+def whois_server(tld, timeout):
+    for line in whois_query(IANA_WHOIS, tld, timeout).splitlines():
+        if line.lower().startswith("whois:"):
+            return line.split(":", 1)[1].strip()
+    return None
+
+
 def from_whois(domain, timeout):
-    try:
-        result = subprocess.run(
-            ["whois", domain], capture_output=True, text=True, timeout=timeout)
-    except FileNotFoundError:
-        return None, "whois is not installed"
-    except subprocess.TimeoutExpired:
-        return None, "whois timed out"
-    if not result.stdout.strip():
-        return None, "whois returned nothing"
-    for line in result.stdout.splitlines():
+    server = whois_server(domain.rsplit(".", 1)[-1].lower(), timeout)
+    if not server:
+        return None, "IANA lists no whois server for the TLD"
+    body = whois_query(server, domain, timeout)
+    if not body.strip():
+        return None, "{} returned nothing".format(server)
+    for line in body.splitlines():
         match = WHOIS_KEYS.match(line)
         if match:
             expires = parse_date(match.group(2))
             if expires:
                 return expires, None
-    return None, "whois has no expiry date"
+    return None, "{} has no expiry date".format(server)
 
 
 def main():

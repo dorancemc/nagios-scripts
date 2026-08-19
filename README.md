@@ -11,7 +11,7 @@ Every file here is ready to copy: download it into the plugins directory, give i
 | `check_connss.py` | Socket connections by state | `ss` |
 | `check_cpu.sh` | CPU usage | `mpstat` |
 | `check_date.sh` | Days left until a given date, for contract or licence expiry | — |
-| `check_domain_expiration.py` | Domain name expiry: asks RDAP first, falls back to whois | `python3`, `whois` |
+| `check_domain_expiration.py` | Domain name expiry: asks RDAP first, falls back to whois | `python3` |
 | `check_iops.sh` | Disk IOPS | `iostat` |
 | `check_loadwhm.php` | Server load through the WHM API | `php-cli` |
 | `check_mem.py` | Memory usage from `/proc/meminfo` | `python3` |
@@ -20,3 +20,9 @@ Every file here is ready to copy: download it into the plugins directory, give i
 | `check_smtp_cert.sh` | Certificate expiry on SMTP port 25 | `openssl` |
 | `check_snmp_netint.py` | Remote network interfaces over SNMP, with Cisco and STP support | `python3`, `net-snmp-utils`, `netint_common.py` |
 | `check_users_ip.py` | Logged-in users, counted once per source address | `python3` |
+
+`check_domain_expiration.py` replaces `check_expiration.sh`. Most ccTLDs publish no expiry
+date over whois and some gTLDs none either, so RDAP is asked first. It takes the whois
+server from IANA rather than from a local table, so it needs no whois binary and no
+`/etc/whois.conf`. That matters for `.co`, which serves no RDAP and which older whois
+clients still map to a server that no longer resolves.
